@@ -1,0 +1,37 @@
+{
+    "name": "omny/yii2-payment-component",
+    "description": "Yii2 payment component",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","payment","component"],
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "Omny",
+            "email": "hello.omny@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0",
+        "yiisoft/yii2": ">=2.0.23"
+    },
+    "require-dev": {
+        "codeception/codeception": "*",
+        "yiisoft/yii2-debug": "*",
+        "yiisoft/yii2-faker": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "omny\\yii2\\payment\\component\\": "src/",
+            "tests\\": "tests/"
+        }
+    },
+    "config": {
+        "process-timeout": 1800
+    },
+    "repositories": [
+      {
+        "type": "composer",
+        "url": "https://asset-packagist.org"
+      }
+    ]
+}

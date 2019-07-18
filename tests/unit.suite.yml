@@ -1,0 +1,10 @@
+suite_namespace: tests\unit
+actor: UnitTester
+modules:
+  enabled:
+    - Yii2:
+        part: [orm, email, fixtures]
+    - Asserts
+  config:
+    Yii2:
+        cleanup: false # don't wrap test in transaction
