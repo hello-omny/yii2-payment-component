@@ -2,7 +2,7 @@
 
 namespace omny\yii2\payment\component\models;
 
-use yii\db\ActiveRecord;
+use omny\yii2\payment\component\base\BaseModel;
 
 /**
  * Class Balance
@@ -13,7 +13,7 @@ use yii\db\ActiveRecord;
  * @property int $user_id
  * @property string $updated_at
  */
-class Balance extends ActiveRecord
+class Balance extends BaseModel
 {
     /**
      * @return string

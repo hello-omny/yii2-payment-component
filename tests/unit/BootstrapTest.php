@@ -2,7 +2,7 @@
 
 namespace src\tests;
 
-use omny\yii2\payment\component\PaymentBootstrap;
+use omny\yii2\payment\component\BootstrapPayment;
 use omny\yii2\payment\component\Payment;
 use tests\TestCase;
 use yii\base\UnknownPropertyException;
@@ -27,7 +27,7 @@ class BootstrapTest extends TestCase
     {
         $appConfig = [
             'bootstrap' => [
-                PaymentBootstrap::class
+                BootstrapPayment::class
             ],
         ];
         $this->mockWebApplication($appConfig);
@@ -39,7 +39,7 @@ class BootstrapTest extends TestCase
     {
         $appConfig = [
             'bootstrap' => [
-                PaymentBootstrap::class
+                BootstrapPayment::class
             ],
         ];
         $this->mockApplication($appConfig);

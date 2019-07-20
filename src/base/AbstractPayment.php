@@ -48,21 +48,27 @@ abstract class AbstractPayment
         $balanceAttribute = $this->balanceAttribute;
         $holdAttribute = $this->holdAttribute;
 
+        $balance = $params->balance;
+        $hold = $params->hold;
+        $amount = $params->amount;
+
         $transaction = \Yii::$app->getDb()->beginTransaction();
         try {
-            $params->balance->$balanceAttribute = $this
-                ->balanceHandler
-                ->reduce((float)$params->balance->$balanceAttribute, (float)$params->amount);
-            $params->hold->$holdAttribute = $this
-                ->holdHandler
-                ->increase((float)$params->hold->$holdAttribute, (float)$params->amount);
+            $balance->$balanceAttribute = $this->balanceHandler
+                ->reduce((float)$balance->$balanceAttribute, (float)$amount);
+            $hold->$holdAttribute = $this->holdHandler
+                ->increase((float)$hold->$holdAttribute, (float)$amount);
 
-            if ($params->balance->save() && $params->hold->save()) {
-                $transaction->commit();
-                return true;
+            if (!$balance->save()) {
+                throw new Exception('Balance did not updated.');
             }
 
-            throw new Exception('Hold and balance did not updated.');
+            if (!$hold->save()) {
+                throw new Exception('Hold did not updated.');
+            }
+
+            $transaction->commit();
+            return true;
         } catch (Exception $exception) {
             $transaction->rollBack();
             throw new Exception(

@@ -8,7 +8,7 @@ use yii\base\BootstrapInterface;
  * Class Bootstrap
  * @package omny\yii2\payment\component
  */
-class PaymentBootstrap implements BootstrapInterface
+class BootstrapPayment implements BootstrapInterface
 {
     /**
      * @param \yii\base\Application $app

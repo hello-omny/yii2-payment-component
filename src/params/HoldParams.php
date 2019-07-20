@@ -2,14 +2,14 @@
 
 namespace omny\yii2\payment\component\params;
 
-use yii\base\BaseObject;
+use omny\yii2\payment\component\base\AbstractParams;
 use yii\db\ActiveRecord;
 
 /**
  * Class HoldParams
  * @package omny\yii2\payment\component\params
  */
-class HoldParams extends BaseObject
+class HoldParams extends AbstractParams
 {
     /** @var ActiveRecord */
     public $balance;
@@ -17,4 +17,19 @@ class HoldParams extends BaseObject
     public $hold;
     /** @var float */
     public $amount;
+    /** @var int */
+    public $userId;
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return [
+            'balance' => (string)$this->balance,
+            'hold' => (string)$this->hold,
+            'amount' => $this->amount,
+            'userId' => $this->userId,
+        ];
+    }
 }

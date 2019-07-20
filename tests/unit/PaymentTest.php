@@ -2,6 +2,7 @@
 
 use omny\yii2\payment\component\models\Balance;
 use omny\yii2\payment\component\models\Hold;
+use omny\yii2\payment\component\models\Transaction;
 use omny\yii2\payment\component\params\HoldParams;
 use omny\yii2\payment\component\params\PurchaseParams;
 use omny\yii2\payment\component\params\RevertHoldParams;
@@ -9,6 +10,8 @@ use omny\yii2\payment\component\params\WithdrawParams;
 use omny\yii2\payment\component\Payment;
 use tests\_fixtures\BalanceFixture;
 use tests\_fixtures\HoldFixture;
+use tests\_fixtures\PaymentFixture;
+use tests\_fixtures\TransactionFixture;
 
 class PaymentTest extends \Codeception\Test\Unit
 {
@@ -31,7 +34,15 @@ class PaymentTest extends \Codeception\Test\Unit
             'balance' => [
                 'class' => BalanceFixture::class,
                 'dataFile' => codecept_data_dir() . 'balance.php',
-            ]
+            ],
+            'transaction' => [
+                'class' => TransactionFixture::class,
+                'dataFile' => codecept_data_dir() . 'transaction.php',
+            ],
+            'payment' => [
+                'class' => PaymentFixture::class,
+                'dataFile' => codecept_data_dir() . 'payment.php',
+            ],
         ]);
     }
 
@@ -44,6 +55,8 @@ class PaymentTest extends \Codeception\Test\Unit
      */
     public function testHoldOk()
     {
+        $this->truncateTabable(Transaction::tableName());
+
         $hold = Hold::findOne(['user_id' => 1]);
         $balance = Balance::findOne(['user_id' => 1,]);
 
@@ -54,12 +67,23 @@ class PaymentTest extends \Codeception\Test\Unit
             'hold' => $hold,
             'balance' => $balance,
             'amount' => 100,
+            'userId' => 1,
         ]);
+
+        $holdParams->validate();
 
         $result = $this->payment->hold($holdParams);
         $this->assertEquals(true, $result);
         $this->assertEquals(400, $hold->value);
         $this->assertEquals(100, $balance->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_HOLD])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNotNull($transaction);
+        $this->assertEquals(json_encode($holdParams->getData()), $transaction->value);
     }
 
     /**
@@ -67,8 +91,11 @@ class PaymentTest extends \Codeception\Test\Unit
      */
     public function testHoldErrorNotEnoughMoney()
     {
-        $hold = Hold::findOne(['user_id' => 2]);
-        $balance = Balance::findOne(['user_id' => 2]);
+        $this->truncateTabable(Transaction::tableName());
+
+        $userId = 2;
+        $hold = Hold::findOne(['user_id' => $userId]);
+        $balance = Balance::findOne(['user_id' => $userId]);
 
         $this->assertEquals(0, $hold->value);
         $this->assertEquals(50, $balance->value);
@@ -76,7 +103,8 @@ class PaymentTest extends \Codeception\Test\Unit
         $holdParams = new HoldParams([
             'hold' => $hold,
             'balance' => $balance,
-            'amount' => 100
+            'amount' => 100,
+            'userId' => $userId,
         ]);
 
         $this->expectException(\Exception::class);
@@ -85,12 +113,26 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->payment->hold($holdParams);
         $this->assertEquals(0, $hold->value);
         $this->assertEquals(50, $balance->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_HOLD])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNull($transaction);
+        $this->assertNotEquals(json_encode($holdParams->getData()), $transaction->value);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testRevertHoldOk()
     {
-        $hold = Hold::findOne(['user_id' => 1]);
-        $balance = Balance::findOne(['user_id' => 1,]);
+        $this->truncateTabable(Transaction::tableName());
+
+        $userId = 1;
+        $hold = Hold::findOne(['user_id' => $userId]);
+        $balance = Balance::findOne(['user_id' => $userId,]);
 
         $this->assertEquals(300, $hold->value);
         $this->assertEquals(200, $balance->value);
@@ -98,17 +140,32 @@ class PaymentTest extends \Codeception\Test\Unit
         $revertHoldParams = new RevertHoldParams([
             'hold' => $hold,
             'balance' => $balance,
-            'amount' => 50
+            'amount' => 50,
+            'userId' => $userId
         ]);
 
         $result = $this->payment->revertHold($revertHoldParams);
         $this->assertEquals(true, $result);
         $this->assertEquals(250, $balance->value);
         $this->assertEquals(250, $hold->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_REVERT_HOLD])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNotNull($transaction);
+        $this->assertEquals(json_encode($revertHoldParams->getData()), $transaction->value);
     }
 
+    /**
+     * @throws \yii\db\Exception
+     * @throws \Exception
+     */
     public function testRevertHoldFail()
     {
+        $this->truncateTabable(Transaction::tableName());
+
         $hold = Hold::findOne(['user_id' => 1]);
         $balance = Balance::findOne(['user_id' => 1,]);
 
@@ -127,6 +184,14 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->payment->revertHold($revertHoldParams);
         $this->assertEquals(250, $balance->value);
         $this->assertEquals(250, $hold->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_REVERT_HOLD])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNull($transaction);
+        $this->assertNotEquals(json_encode($revertHoldParams->getData()), $transaction->value);
     }
 
     /**
@@ -134,6 +199,8 @@ class PaymentTest extends \Codeception\Test\Unit
      */
     public function testPurchaseOk()
     {
+        $this->truncateTabable(Transaction::tableName());
+
         $hold = Hold::findOne(['user_id' => 1]);
         $customerBalance = Balance::findOne(['user_id' => 1,]);
         $creatorBalance = Balance::findOne(['user_id' => 2]);
@@ -159,10 +226,24 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(90, $customerBalance->value);
         $this->assertEquals(150, $creatorBalance->value);
         $this->assertEquals(10, $systemBalance->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_PURCHASE])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNotNull($transaction);
+        $this->assertEquals(json_encode($purchaseParams->getData()), $transaction->value);
     }
 
+    /**
+     * @throws \yii\db\Exception
+     * @throws \Exception
+     */
     public function testPurchaseFailNotEnoughMoney()
     {
+        $this->truncateTabable(Transaction::tableName());
+
         $hold = Hold::findOne(['user_id' => 1]);
         $customerBalance = Balance::findOne(['user_id' => 1,]);
         $creatorBalance = Balance::findOne(['user_id' => 2]);
@@ -190,6 +271,14 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(200, $customerBalance->value);
         $this->assertEquals(50, $creatorBalance->value);
         $this->assertEquals(0, $systemBalance->value);
+
+        $transaction = Transaction::find()
+            ->where(['type' => Transaction::TYPE_PURCHASE])
+            ->orderBy('created_at DESC')
+            ->one();
+
+        $this->assertNull($transaction);
+        $this->assertNotEquals(json_encode($purchaseParams->getData()), $transaction->value);
     }
 
     public function testPurchaseFailHoldSmall()
@@ -223,13 +312,24 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(0, $systemBalance->value);
     }
 
-    public function testWithdrawOk()
+    public function t1estWithdrawOk()
     {
         $this->payment->withdraw(new WithdrawParams());
     }
 
-    public function testWithdrawFail()
+    public function t1estWithdrawFail()
     {
         $this->payment->withdraw(new WithdrawParams());
+    }
+
+    /**
+     * @param string $tableName
+     * @throws \yii\db\Exception
+     */
+    private function truncateTabable(string $tableName): void
+    {
+        \Yii::$app->getDb()
+            ->createCommand(sprintf('truncate table %s;', $tableName))
+            ->execute();
     }
 }

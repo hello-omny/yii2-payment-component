@@ -1,13 +1,12 @@
 <?php
 
 use omny\yii2\payment\component\models\Balance;
-use tests\_fixtures\models\Hold;
 use yii\db\Migration;
 
 /**
- * Handles the creation of table `payment`.
+ * Class m181017_083806_create_balance
  */
-class m181017_083806_create_payment_tables extends Migration
+class m181017_083806_create_balance extends Migration
 {
     const INDEX_TEMPLATE = 'idx__%s__%s';
 
@@ -21,28 +20,12 @@ class m181017_083806_create_payment_tables extends Migration
     public function safeUp()
     {
         $this->createTable(
-            Hold::tableName(),
-            [
-                'id' => $this->bigPrimaryKey()->unsigned(),
-                'value' => $this->decimal(10,2)->notNull()->defaultValue(0),
-                'user_id' => $this->bigInteger()->unsigned()->notNull(),
-                'updated_at' => $this->dateTime()->defaultExpression(self::CURRENT_TIMESTAMP_EXPRESSION),
-            ]
-        );
-        $this->createIndex(
-            sprintf(self::INDEX_TEMPLATE, Hold::tableName(), 'user_id'),
-            Hold::tableName(),
-            'user_id',
-            true
-        );
-
-        $this->createTable(
             Balance::tableName(),
             [
                 'id' => $this->bigPrimaryKey()->unsigned(),
                 'value' => $this->decimal(10,2)->notNull()->defaultValue(0),
                 'user_id' => $this->bigInteger()->unsigned()->notNull(),
-                'updated_at' => $this->dateTime()->defaultExpression(self::DEFAULT_ON_UPDATE_EXPRESSION),
+                'updated_at' => $this->timestamp()->defaultExpression(self::DEFAULT_ON_UPDATE_EXPRESSION),
             ]
         );
         $this->createIndex(
@@ -58,7 +41,6 @@ class m181017_083806_create_payment_tables extends Migration
      */
     public function safeDown()
     {
-        $this->dropTable(Hold::tableName());
         $this->dropTable(Balance::tableName());
     }
 }

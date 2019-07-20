@@ -2,6 +2,8 @@
 
 namespace omny\yii2\payment\component\models;
 
+use omny\yii2\payment\component\base\BaseModel;
+
 /**
  * Class Hold
  * @package omny\yii2\payment\component\models
@@ -11,7 +13,7 @@ namespace omny\yii2\payment\component\models;
  * @property int $user_id
  * @property string $updated_at
  */
-class Hold extends \yii\db\ActiveRecord
+class Hold extends BaseModel
 {
     /**
      * @return string
