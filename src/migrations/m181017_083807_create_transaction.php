@@ -1,6 +1,5 @@
 <?php
 
-use omny\yii2\payment\component\models\Balance;
 use omny\yii2\payment\component\models\Transaction;
 use yii\db\Migration;
 

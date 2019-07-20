@@ -34,4 +34,22 @@ class Balance extends BaseModel
             ['updated_at', 'safe'],
         ];
     }
+
+    /**
+     * @param int $userId
+     * @return Balance
+     */
+    public static function getOneForUser(int $userId): self
+    {
+        $model = static::findOne(['user_id' => $userId]);
+
+        if ($model === null) {
+            $model = new static([
+                'user_id' => $userId,
+                'value' => 0,
+            ]);
+        }
+
+        return $model;
+    }
 }

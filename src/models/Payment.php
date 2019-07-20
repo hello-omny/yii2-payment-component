@@ -7,6 +7,13 @@ use omny\yii2\payment\component\base\BaseModel;
 /**
  * Class Payment
  * @package omny\yii2\payment\component\models
+ *
+ * @property int $id
+ * @property float $amount
+ * @property int $status
+ * @property int $user_id
+ * @property string $created_at
+ * @property string $made_at
  */
 class Payment extends BaseModel
 {
@@ -18,8 +25,20 @@ class Payment extends BaseModel
     /**
      * @return string
      */
-    public static function tableName()
+    public static function tableName(): string
     {
         return 'payment';
+    }
+
+    /**
+     * @return array
+     */
+    public function rules(): array
+    {
+        return [
+            ['amount', 'number'],
+            [['status', 'user_id'], 'integer'],
+            [['created_at', 'made_at'], 'safe'],
+        ];
     }
 }

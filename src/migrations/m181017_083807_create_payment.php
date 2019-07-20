@@ -24,7 +24,6 @@ class m181017_083807_create_payment extends Migration
             [
                 'id' => $this->bigPrimaryKey()->unsigned(),
                 'amount' => $this->decimal(10,2)->notNull()->defaultValue(0),
-                'tax' => $this->decimal(10,2)->notNull()->defaultValue(0),
                 'status' => $this->integer()->defaultValue(Payment::STATUS_NEW),
                 'user_id' => $this->bigInteger()->unsigned()->notNull(),
                 'created_at' => $this->dateTime()->notNull()->defaultExpression(self::CURRENT_TIMESTAMP_EXPRESSION),
