@@ -126,20 +126,22 @@ abstract class AbstractPayment
 
         $transaction = \Yii::$app->getDb()->beginTransaction();
         try {
-            $params->hold->$holdAttribute = $this
-                ->holdHandler
-                ->reduce($params->hold->$holdAttribute, $params->amount + $params->tax);
-            $params->customerBalance->$balanceAttribute = $this
-                ->balanceHandler
+            $holdValue = $params->holdValue;
+            if ($params->holdValue === null) {
+                $holdValue = $params->amount + $params->tax;
+            }
+
+            $params->holdModel->$holdAttribute = $this->holdHandler
+                ->reduce($params->holdModel->$holdAttribute, $holdValue);
+
+            $params->customerBalance->$balanceAttribute = $this->balanceHandler
                 ->reduce($params->customerBalance->$balanceAttribute, $params->amount + $params->tax);
-            $params->creatorBalance->$balanceAttribute = $this
-                ->balanceHandler
+            $params->creatorBalance->$balanceAttribute = $this->balanceHandler
                 ->increase($params->creatorBalance->$balanceAttribute, $params->amount);
-            $params->systemBalance->$balanceAttribute = $this
-                ->balanceHandler
+            $params->systemBalance->$balanceAttribute = $this->balanceHandler
                 ->increase($params->systemBalance->$balanceAttribute, $params->tax);
 
-            if ($params->hold->save()
+            if ($params->holdModel->save()
                 && $params->customerBalance->save()
                 && $params->creatorBalance->save()
                 && $params->systemBalance->save()) {

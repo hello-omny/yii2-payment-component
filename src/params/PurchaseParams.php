@@ -12,7 +12,9 @@ use yii\db\ActiveRecord;
 class PurchaseParams extends AbstractParams
 {
     /** @var ActiveRecord */
-    public $hold;
+    public $holdModel;
+    /** @var float */
+    public $holdValue;
     /** @var ActiveRecord */
     public $customerBalance;
     /** @var ActiveRecord */
@@ -30,12 +32,13 @@ class PurchaseParams extends AbstractParams
     public function getData(): array
     {
         return [
-            'hold' => (string)$this->hold,
+            'holdValue' => $this->holdValue,
+            'amount' => $this->amount,
+            'tax' => $this->tax,
+            'holdModel' => (string)$this->holdModel,
             'customerBalance' => (string)$this->customerBalance,
             'creatorBalance' => (string)$this->creatorBalance,
             'systemBalance' => (string)$this->systemBalance,
-            'amount' => $this->amount,
-            'tax' => $this->tax,
         ];
     }
 }

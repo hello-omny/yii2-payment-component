@@ -212,7 +212,8 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(0, $systemBalance->value);
 
         $purchaseParams = new PurchaseParams([
-            'hold' => $hold,
+            'holdModel' => $hold,
+            'holdValue' => 110,
             'customerBalance' => $customerBalance,
             'creatorBalance' => $creatorBalance,
             'systemBalance' => $systemBalance,
@@ -255,7 +256,8 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(0, $systemBalance->value);
 
         $purchaseParams = new PurchaseParams([
-            'hold' => $hold,
+            'holdModel' => $hold,
+            'holdValue' => 260,
             'customerBalance' => $customerBalance,
             'creatorBalance' => $creatorBalance,
             'systemBalance' => $systemBalance,
@@ -294,7 +296,7 @@ class PaymentTest extends \Codeception\Test\Unit
         $this->assertEquals(0, $systemBalance->value);
 
         $purchaseParams = new PurchaseParams([
-            'hold' => $hold,
+            'holdModel' => $hold,
             'customerBalance' => $customerBalance,
             'creatorBalance' => $creatorBalance,
             'systemBalance' => $systemBalance,

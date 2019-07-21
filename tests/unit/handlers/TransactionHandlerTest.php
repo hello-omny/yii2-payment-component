@@ -60,18 +60,19 @@ class TransactionHandlerTest extends \Codeception\Test\Unit
         $hold = Hold::findOne(['user_id' => $userId]);
         $params = new PurchaseParams([
             'amount' => 100,
-            'hold' => $hold,
+            'holdValue' => 110,
+            'tax' => 10,
+            'holdModel' => $hold,
             'customerBalance' => Balance::findOne(['user_id' => $userId]),
             'creatorBalance' => Balance::findOne(['user_id' => 2]),
             'systemBalance' => Balance::findOne(['user_id' => 100]),
-            'tax' => 10,
         ]);
 
         $transaction = $this->handler->create($params);
         $this->assertInstanceOf(Transaction::class, $transaction);
 
         $savedTransaction = Transaction::find()->one();
-        $holdFromTransaction = json_decode($savedTransaction->value, true)['hold'];
+        $holdFromTransaction = json_decode($savedTransaction->value, true)['holdModel'];
 
         $this->assertEquals($holdFromTransaction, $hold);
     }
@@ -82,9 +83,9 @@ class TransactionHandlerTest extends \Codeception\Test\Unit
         $hold = Hold::findOne(['user_id' => $userId]);
         $params = new HoldParams([
             'amount' => 100,
+            'userId' => 1,
             'hold' => $hold,
             'balance' => Balance::findOne(['user_id' => $userId]),
-            'userId' => 1,
         ]);
 
         $transaction = $this->handler->create($params);
@@ -102,9 +103,9 @@ class TransactionHandlerTest extends \Codeception\Test\Unit
         $hold = Hold::findOne(['user_id' => $userId]);
         $params = new RevertHoldParams([
             'amount' => 100,
+            'userId' => 1,
             'hold' => $hold,
             'balance' => Balance::findOne(['user_id' => $userId]),
-            'userId' => 1,
         ]);
 
         $transaction = $this->handler->create($params);
