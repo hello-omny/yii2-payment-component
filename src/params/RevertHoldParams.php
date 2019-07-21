@@ -26,10 +26,10 @@ class RevertHoldParams extends AbstractParams
     public function getData(): array
     {
         return [
-            'hold' => (string)$this->hold,
-            'balance' => (string)$this->balance,
             'amount' => $this->amount,
             'userId' => $this->userId,
+            'hold' => (string)$this->hold,
+            'balance' => (string)$this->balance,
         ];
     }
 }

@@ -26,10 +26,10 @@ class HoldParams extends AbstractParams
     public function getData(): array
     {
         return [
-            'balance' => (string)$this->balance,
-            'hold' => (string)$this->hold,
             'amount' => $this->amount,
             'userId' => $this->userId,
+            'balance' => (string)$this->balance,
+            'hold' => (string)$this->hold,
         ];
     }
 }

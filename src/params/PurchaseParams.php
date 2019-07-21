@@ -22,9 +22,9 @@ class PurchaseParams extends AbstractParams
     /** @var ActiveRecord */
     public $systemBalance;
     /** @var float */
-    public $amount;
+    public $amount = 0;
     /** @var float */
-    public $tax;
+    public $tax = 0;
 
     /**
      * @return array
