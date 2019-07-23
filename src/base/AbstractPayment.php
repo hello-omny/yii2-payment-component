@@ -126,25 +126,39 @@ abstract class AbstractPayment
 
         $transaction = \Yii::$app->getDb()->beginTransaction();
         try {
+            $customerBalance = $params->customerBalance;
+            $creatorBalance = $params->creatorBalance;
+            $systemBalance = $params->systemBalance;
+            $holdModel = $params->holdModel;
+
             $holdValue = $params->holdValue;
             if ($params->holdValue === null) {
                 $holdValue = $params->amount + $params->tax;
             }
 
-            $params->holdModel->$holdAttribute = $this->holdHandler
-                ->reduce($params->holdModel->$holdAttribute, $holdValue);
+            // remove hold
+            $holdModel->$holdAttribute = $this->holdHandler
+                ->reduce($holdModel->$holdAttribute, $holdValue);
 
-            $params->customerBalance->$balanceAttribute = $this->balanceHandler
-                ->reduce($params->customerBalance->$balanceAttribute, $params->amount + $params->tax);
-            $params->creatorBalance->$balanceAttribute = $this->balanceHandler
-                ->increase($params->creatorBalance->$balanceAttribute, $params->amount);
-            $params->systemBalance->$balanceAttribute = $this->balanceHandler
-                ->increase($params->systemBalance->$balanceAttribute, $params->tax);
+            // charge back hold
+            $customerBalance->$balanceAttribute = $this->balanceHandler
+                ->increase($customerBalance->$balanceAttribute, $holdValue);
+            // reduce by real price
+            $customerBalance->$balanceAttribute = $this->balanceHandler
+                ->reduce($customerBalance->$balanceAttribute, $params->amount + $params->tax);
 
-            if ($params->holdModel->save()
-                && $params->customerBalance->save()
-                && $params->creatorBalance->save()
-                && $params->systemBalance->save()) {
+            // increase creator balance
+            $creatorBalance->$balanceAttribute = $this->balanceHandler
+                ->increase($creatorBalance->$balanceAttribute, $params->amount);
+
+            // update system balance
+            $systemBalance->$balanceAttribute = $this->balanceHandler
+                ->increase($systemBalance->$balanceAttribute, $params->tax);
+
+            if ($holdModel->save()
+                && $customerBalance->save()
+                && $creatorBalance->save()
+                && $systemBalance->save()) {
 
                 $transaction->commit();
                 return true;
